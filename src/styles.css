@@ -1,10 +1,37 @@
 .canvas {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    margin: auto;
+    display: block; /* Это гарантирует, что элементы будут располагаться друг над другом */
+    margin: auto; /* Центрирует элементы по горизонтали */
+}
+
+#score {
+    text-align: center; /* Центрирует текст внутри <p> */
+    font-size: 24px; /* Устанавливает размер шрифта */
+    color: #000; /* Устанавливает цвет текста */
+    margin-bottom: 10px; /* Добавляет небольшой отступ снизу */
+
+}
+
+#button {
+    text-align: center; /* Центрирует текст внутри <p> */
+    font-size: 24px; 
+    color: #ffffff; /* Устанавливает цвет текста */
+    margin-bottom: 10px; /* Добавляет небольшой отступ снизу */
+    background-color: #000;
+    padding: 10px 20px;
+
+}
+.container {
+    display: flex;
+    flex-direction: column; /* Организует содержимое по вертикали */
+    justify-content: center; /* Центрирует содержимое по вертикали */
+    align-items: center; /* Центрирует содержимое по горизонтали */
+   
+}
+
+#canvas {
+    background-color: #ffffff; /* Устанавливает цвет фона для canvas */
+    border: 1px solid #000; /* Добавляет тонкую черную рамку вокруг canvas */
+    margin: 30px ;
 }
 
 body {
