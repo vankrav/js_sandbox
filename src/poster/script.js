@@ -11,7 +11,7 @@ canvasMatrix.height = 60;
 canvasMatrix.width = 60;
 const ctxMatrix = canvasMatrix.getContext("2d");
 
-ctxMatrix.font = " 60px Times New Roman";
+ctxMatrix.font = " 60px TRuin";
 ctxMatrix.textAlign = "center";
 
 
@@ -32,9 +32,9 @@ function Cell(x, y, size, value, color, zombie) {
 
 const cellSize = 10;
 const colorPair = {
-    cell : "#BEB2C8",
-    noCell :  "#36413E",
-    zombie : "#FFE66D"
+    cell : "#8D94BA",
+    noCell :  "#B4EDD2",
+    zombie : "#EE6352"
 }
 
 
@@ -196,13 +196,13 @@ function addLetter() {
 
 
 // field.chance = 1;
-field.zombieChance = 0.97;
+field.zombieChance = 0.9;
 field.create();
 field.random();
 // // field.clear();
 let a = letter
 
-let string = "ЭТО ПРОЙДЕТ"
+let string = "ЭТОПРОЙДЁТ"
 
 
 
@@ -212,12 +212,13 @@ let string = "ЭТО ПРОЙДЕТ"
 
 let index = 0;
 function init() {
-    
+    field.zombieChance -= 0.001;
     field.draw();
     field.update();
     if(field.countZombie() < 50) {
          a.createMatrix(string[index]);
-        field.add(field.cols/2 - 30, field.rows/2 - 30, a);
+        field.add(field.cols/2 - 30, field.rows/2 - 33, a);
+        field.zombieChance += 0.08;
         console.log(string[index]);
        
         index++;
