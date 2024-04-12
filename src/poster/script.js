@@ -6,14 +6,24 @@ context.fillStyle = "rgb(200,200,200)";
 context.fillRect(0,0, canvas.width, canvas.height);
 
 
+const canvasMatrix = document.getElementById("matrix");
+canvasMatrix.height = 60;
+canvasMatrix.width = 60;
+const ctxMatrix = canvasMatrix.getContext("2d");
+
+ctxMatrix.font = " 60px TRuin";
+ctxMatrix.textAlign = "center";
 
 
-function Cell(x, y, size, value, color) {
+
+
+function Cell(x, y, size, value, color, zombie) {
     this.x = x;
     this.y = y;
     this.size = size;
     this.value = value;
     this.color = color;
+    this.zombie = zombie;
     this.draw = function() {
         context.fillStyle = this.color;
         context.fillRect(this.x*this.size, this.y*this.size, this.size, this.size);
@@ -22,8 +32,9 @@ function Cell(x, y, size, value, color) {
 
 const cellSize = 10;
 const colorPair = {
-    cell : "#1C1D21",
-    noCell :  "#a288a6"
+    cell : "#8D94BA",
+    noCell :  "#B4EDD2",
+    zombie : "#EE6352"
 }
 
 
@@ -35,12 +46,34 @@ let glyder = {
              [1, 1, 1]]
 }
 
+let letter = {
+    width: 60,
+    height: 60,
+    matrix: [],
+    createMatrix: function(letter) {
+
+        ctxMatrix.fillText(letter, 30, 55);
+        const imageData = ctxMatrix.getImageData(0,0, 60, 60);
+        for (let j = 0; j < imageData.height; j ++) {
+            this.matrix[j] = [];
+             for (let i = 0; i < imageData.width; i ++) {
+                const index = (j * imageData.width + i) * 4;
+                this.matrix[j][i] = imageData.data[index + 3] ? 1 : 0;
+                
+            }
+        }
+        ctxMatrix.clearRect(0, 0, 60, 60);
+    }
+};
+
+
 
 let field = {
     cellSize: cellSize,
     cols: canvas.width/cellSize,
     rows: canvas.height/cellSize,
     chance: 0.5,
+    zombieChance: 0.9,
     cells: [],
 
     count : function() {
@@ -52,18 +85,29 @@ let field = {
         }
         return count;
     },
+    countZombie : function() {
+        let count = 0;
+        for(let j = 0; j < this.rows; j++) {
+            for(let i = 0; i < this.cols; i++) {
+                if(this.cells[j][i].zombie) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    },
     create : function() {
         for(let j = 0; j < this.rows; j++) {
             this.cells[j] = [];
             for(let i = 0; i < this.cols; i++) {
-                this.cells[j][i] = new Cell(i, j, this.cellSize,0, colorPair.cell);
+                this.cells[j][i] = new Cell(i, j, this.cellSize,0, colorPair.cell, 0);
             }
         }
     },
     random : function() {
         for(let j = 0; j < this.rows; j++) {
             for(let i = 0; i < this.cols; i++) {
-                this.cells[j][i].value =  Math.random() <= 0.5;
+                this.cells[j][i].value =  Math.random() <= 0.6;
              
             }
         }
@@ -87,11 +131,16 @@ let field = {
                 let currentState = this.cells[j][i].value;
                 let newState = currentState;
 
-                if(currentState == 1 && (count < 2 || count > 3)) {
+                if(!this.cells[j][i].zombie && currentState == 1 && (count < 2 || count > 3)) {
                     newState = 0; 
-                } else if(currentState == 0 && count == 3) {
+                } else if(!this.cells[j][i].zombie && currentState == 0 && count == 3) {
                     newState = 1; 
                 }
+
+                if(this.cells[j][i].zombie && currentState == 1 && Math.random() > this.zombieChance) {
+                    newState = 0; 
+                    this.cells[j][i].zombie = 0;
+                } 
 
                 newStates[j][i] = newState;
             }
@@ -123,6 +172,7 @@ let field = {
         for(let j = 0; j < this.rows; j++) {
             for(let i = 0; i < this.cols; i++) {
                 this.cells[j][i].color = this.cells[j][i].value ? colorPair.cell : colorPair.noCell;
+                this.cells[j][i].color = this.cells[j][i].zombie ? colorPair.zombie : this.cells[j][i].color;
                 this.cells[j][i].draw();
             }
         }
@@ -132,7 +182,7 @@ let field = {
         for(let j = 0; j < figure.height; j++) {
             for(let i = 0; i < figure.width; i++) {
                 this.cells[y+j][x+i].value = figure.matrix[j][i];
-             
+                this.cells[y+j][x+i].zombie = this.cells[y+j][x+i].value ? 1 : 0;
             }
         }
 }
@@ -140,54 +190,45 @@ let field = {
 
 
 
-// async function imageToMatrix(imagePath) {
-//     const image = new Image();
-//     image.crossOrigin = "anonymous";
-//     image.src = imagePath;
-//     await image.decode();
-
-//     const cv = document.createElement('canvas');
-//     const ctx = canvas.getContext('2d');
-//     cv.width = 340;
-//     canvas.height = 340;
-//     ctx.drawImage(image, 0, 0, 340, 340);
-//     const imageData = ctx.getImageData(0, 0, 340, 340);
-//     const matrix = [];
-//     for (let y = 0; y < 34; y++) {
-//         const row = [];
-//         for (let x = 0; x < 34; x++) {
-//             const index = (y * 34 + x) * 4;
-//             const r = imageData.data[index];
-//             const g = imageData.data[index + 1];
-//             const b = imageData.data[index + 2];
-//             // Считаем участок ярким, если среднее значение RGB больше 127
-//             row.push((r + g + b) / 3 > 50 ? 1 : 0);
-//         }
-//         matrix.push(row);
-//     }
-//     return matrix;
-// }
-
+function addLetter() { 
+    
+}
 
 
 // field.chance = 1;
+field.zombieChance = 0.9;
 field.create();
 field.random();
 // // field.clear();
-// field.add(30, 30, glyder);
+let a = letter
 
-let t = 1;
+let string = "ЭТОПРОЙДЁТ"
+
+
+
+
+
+
+
+let index = 0;
 function init() {
-    requestAnimationFrame(init, 40);
-    // field.chance = Math.sin(t) * 0.1 + 0.9;
-    // t+=0.01;
+    field.zombieChance -= 0.001;
     field.draw();
     field.update();
-    
-    console.log(field.count());
+    if(field.countZombie() < 50) {
+         a.createMatrix(string[index]);
+        field.add(field.cols/2 - 30, field.rows/2 - 33, a);
+        field.zombieChance += 0.08;
+        console.log(string[index]);
+       
+        index++;
+        if(index == string.length) {
+            index = 0;
+        }
+    }
+    console.log(field.countZombie());
 
 }
-// setInterval(init, 80);
+setInterval(init, 40);
 init();
-// let letterA = imageToMatrix("/Users/vankrav/Projects/js_sandbox/src/poster/a.png");
-// console.log(letterA);
+
