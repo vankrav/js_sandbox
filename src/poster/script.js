@@ -1,23 +1,30 @@
 import {game, text} from "./game.js"
+import { colorGenerator } from "./colorGenerator.js";
+const resolution = {
+    width: 720,
+    height: 1080,
+    cell: 5
+}
 
-
-
-
+let colors = colorGenerator();
 
 let field = game;
-field.setup("canvas", 1080, 1080, 10);
+field.setup("canvas", resolution.width, resolution.height, resolution.cell, colors);
 field.zombieChance = 0.9;
 field.create();
-field.random();
+// field.random();
 field.draw();
 
 
 let a = text;
-a.setup("matrix", 108, 108);
+a.setup("matrix", 
+        resolution.width / resolution.cell, 
+        resolution.height / resolution.cell, 
+        "Baskerville");
 let string = "ЭТОПРОЙДЁТ"
 
 // //create a synth and connect it to the main output (your speakers)
-const synth =  new Tone.FMSynth(Tone.Synth).toDestination();
+// const synth =  new Tone.AMSynth(Tone.Synth).toDestination();
 
 // //play a middle 'C' for the duration of an 8th note
 // synth.triggerAttackRelease("C4", "8n");
@@ -28,9 +35,9 @@ let zombie;
 let index = 0;
 function init() {
     zombie = field.countZombie();
-    if(zombie > 30){
-    synth.triggerAttackRelease(Math.round(900 / zombie) *  Math.pow(index+1, 1.2), "32n");
-    }
+    // if(zombie > 30){
+    // synth.triggerAttackRelease(Math.round(900 / zombie) *  Math.pow(index+1, 1.2), "32n");
+    // }
     
     field.zombieChance -= 0.001;
     field.draw();

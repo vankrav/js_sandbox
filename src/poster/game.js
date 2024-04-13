@@ -30,7 +30,7 @@ export let game = {
         noCell :  "#B4EDD2",
         zombie : "#EE6352"
     },
-    setup : function(id, width, height, cellSize ) {
+    setup : function(id, width, height, cellSize , colors) {
         this.canvas = document.getElementById(id);
         this.context = canvas.getContext('2d');
         this.canvas.width = width;
@@ -39,6 +39,8 @@ export let game = {
         this.cols = width / cellSize;
         this.rows = height / cellSize;
         this.cellSize = cellSize;
+
+        this.colorPair = colors;
 
     },
     count : function() {
@@ -92,7 +94,8 @@ export let game = {
         for(let j = 0; j < this.rows; j++) {
             newStates[j] = [];
             for(let i = 0; i < this.cols; i++) {
-                let count = this.neirboursCount(i, j);
+                let count = this.neirbours(i, j).count;
+                
                 let currentState = this.cells[j][i].value;
                 let newState = currentState;
 
@@ -106,7 +109,7 @@ export let game = {
                     newState = 0; 
                     this.cells[j][i].zombie = 0;
                 } 
-
+                
                 newStates[j][i] = newState;
             }
         }
@@ -118,8 +121,12 @@ export let game = {
         }
     },
 
-    neirboursCount: function(x, y) {
-        let count = 0;
+    neirbours: function(x, y) {
+        let neirbour = {
+            count : 0,
+            color : {r: 0, g: 0, b: 0}
+        };
+        let colorCount = 0;
         const directions = [
             [-1, -1], [-1, 0], [-1, 1],
             [0, -1],           [0, 1],
@@ -128,9 +135,11 @@ export let game = {
         directions.forEach(([dx, dy]) => {
             const newX = (x + dx + this.cols) % this.cols;
             const newY = (y + dy + this.rows) % this.rows;
-            count += this.cells[newY][newX].value;
+            neirbour.count += this.cells[newY][newX].value;
+           
         });
-        return count;
+       
+        return neirbour;
     },
     
     draw: function () {
@@ -161,7 +170,7 @@ export let text = {
     width: 0,
     height: 0,
     matrix: [],
-    setup : function(id, width, height) {
+    setup : function(id, width, height,font) {
         this.canvas = document.getElementById(id);
         this.context = this.canvas.getContext('2d');
         this.canvas.width = width;
@@ -170,12 +179,12 @@ export let text = {
         this.width = width;
         this.height = height;
         this.context.textAlign = "center";
-        this.context.font = this.height/1.5 + "px Times New Roman";
+        this.context.font = this.height/1.5 + "px " +font;
 
     },
     createMatrix: function(letter) {
 
-        this.context.fillText(letter, this.width/2, this.height/1.3);
+        this.context.fillText(letter, this.width/2, this.height/1.35);
         const imageData = this.context.getImageData(0,0, this.width, this.height);
         for (let j = 0; j < this.height; j ++) {
             this.matrix[j] = [];
